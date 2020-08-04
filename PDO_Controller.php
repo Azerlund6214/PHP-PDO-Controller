@@ -23,6 +23,7 @@
 		}
 		
 		####################################
+		### Все про подключение
 		
 		/**
 		 * Собирает строку подключения из данных массива.
@@ -114,17 +115,6 @@
 		}
 		
 		
-		
-		
-		
-		
-		
-		####################################
-		
-		
-
-		
-		
 		/**
 		 * Проверка работоспособности соединения с СУБД
 		 * Полезно для быстрого теста при первом подключении БД
@@ -158,7 +148,14 @@
 		}
 		
 		
+		/**
+		 * Отключиться от сервера СУБД
+		 */
+		public function Disconnect___PUSTO( ){		}
 		
+		
+		####################################
+		### Мелкие запросы-обертки
 		
 		/**
 		 * Выбрать рабочую БД
@@ -176,29 +173,19 @@
 		}
 		
 		
-		/**
-		 * Произошла ли ошибка?
-		 * @return bool = true / false
-		 */
-		public function Has_error(  )
-		{
-			if ( $this->connection->errorCode() != "00000" )
-				return true;
-			
-			return false;
-		}
-		
-		
-		
-		
+		####################################
+		### Исключения и отладка.
 		
 		/**
 		 * Вывести текстом последнюю ошибку mysqli
+		 * @param bool $Exit_after_echo - Завершить скрипт после вывода
 		 */
-		public function Echo_error(  )
+		public function Echo_error( $Exit_after_echo = false )
 		{
-			$con = $this->getConnection();
+			# https://www.php.net/manual/ru/pdo.errorinfo.php
+			# https://www.php.net/manual/ru/pdo.errorcode.php
 			
+			$con = $this->getConnection();
 			
 			if ( $con->errorCode() != "00000" )
 			{
@@ -212,9 +199,56 @@
 			}
 			else
 				echo "<br>Echo_error => Ошибок нет";
+			
+			
+			if ( $Exit_after_echo )
+				exit("<hr>PDO->Echo_error - Exit_after_echo=true");
+		}
+		
+		/**
+		 * Произошла ли ошибка?
+		 * @return bool = true / false
+		 */
+		public function Has_error(  )
+		{
+			if ( $this->connection->errorCode() != "00000" )
+				return true;
+			
+			return false;
 		}
 		
 		
+		####################################
+		###
+		
+		
+		
+		
+		####################################
+		###
+		
+		
+		
+		
+		####################################
+		###
+		
+		
+		
+		/*
+	$pdo = new PDO (whatever);
+	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	try {
+		$pdo->exec ("QUERY WITH SYNTAX ERROR");
+	} catch (PDOException $e) {
+		if ($e->getCode() == '2A000')
+			echo "Syntax Error: ".$e->getMessage();
+	}
+*/
+		
+		
+
+
 		
 		
 		
@@ -227,10 +261,6 @@
 		
 		
 		
-		/**
-         * Отключиться от сервера СУБД
-         */
-		public function Disconnect( ){		}
 
 
 
