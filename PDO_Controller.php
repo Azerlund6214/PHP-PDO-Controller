@@ -3,14 +3,24 @@
 	class PDO_C
 	{
 
-		public $connection; # Главное подключение к бд
+		public $connection; # Главное подключение к бд. Получать через getConnection()
 		
-		public $connectionString = null; #
+		public $connectionString = null; # Записывается только в случае успеха
 		public $username = ''; #
 		public $password = ''; #
 		
 		
 		
+		
+		####################################
+		
+		public function __construct( $con_str = null , $user = null , $pass = null )
+		{
+			
+			if( $con_str && $user && $pass )
+				$this->Connect($con_str , $user , $pass);
+			
+		}
 		
 		####################################
 		
@@ -85,6 +95,7 @@
 			
 		}
 		
+		
 		/**
 		 * Возвращает подключение либо завершает скрипт если его нет.
 		 * @return PDO Connection / Exit
@@ -112,38 +123,114 @@
 		
 		
 
-
-
-		public function __construct( $con_str = null , $user = null , $pass = null )
+		
+		
+		/**
+		 * Проверка работоспособности соединения с СУБД
+		 * Полезно для быстрого теста при первом подключении БД
+		 * @return bool = true / false
+		 * echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
+		 */
+		function Check_connection(  )
 		{
-
-		    if( $con_str && $user && $pass )
-                $this->Connect($con_str , $user , $pass);
-
+			
+			$con = $this->getConnection();
+			
+			
+			# Если еще ни разу не подключались
+			if( ! $con )
+				return false;
+			
+			
+			# Если уже подключались, пробуем выполнить запрос.
+			$statement = $con->prepare("SELECT VERSION()");
+			$statement->execute( );
+			$result = $statement->fetch(  )[0];
+			
+			#print_r($result);
+			
+			if( ! $result )
+				return false;
+			
+			
+			return true;
+			
 		}
 		
 		
 		
 		
-	
+		/**
+		 * Выбрать рабочую БД
+		 * @param string $target_db
+		 */
+		public function Select_db( $target_db )
+		{
+			$con = $this->getConnection();
+			
+			$con->exec("USE $target_db");
+			
+			if( $this->Has_error() )
+				$this->Echo_error( true ); # Вывести инфу и ВЫЙТИ
+			
+		}
+		
+		
+		/**
+		 * Произошла ли ошибка?
+		 * @return bool = true / false
+		 */
+		public function Has_error(  )
+		{
+			if ( $this->connection->errorCode() != "00000" )
+				return true;
+			
+			return false;
+		}
 		
 		
 		
 		
-
-
-
-        /**
+		
+		/**
+		 * Вывести текстом последнюю ошибку mysqli
+		 */
+		public function Echo_error(  )
+		{
+			$con = $this->getConnection();
+			
+			
+			if ( $con->errorCode() != "00000" )
+			{
+				echo "<hr>Echo_error => Есть ошибки." ;
+				echo "<br><br>PDO::errorCode() => " . $con->errorCode() ;
+				echo "<br>PDO::errorInfo() [2] => " . $con->errorInfo()[2] ;
+				
+				echo "<br><br>PDO::errorInfo() => " ;
+				echo "<pre>"; print_r ( $con->errorInfo() ); echo "</pre>";
+				
+			}
+			else
+				echo "<br>Echo_error => Ошибок нет";
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		/**
          * Отключиться от сервера СУБД
          */
-		public function Disconnect( )
-		{
-		    // Нужна проверка что если уже закрыто или пустое
-
-			$this->db->close();
-			$this->db = null;
-
-		}
+		public function Disconnect( ){		}
 
 
 
@@ -224,62 +311,10 @@
 		}
 
 
-        /**
-         * Выбрать рабочую БД
-         * @param string $target_db
-         */
-		public function Select_db( $target_db )
-		{
-			$this->db -> query("USE $target_db");
-		}
-		
-
-        /**
-         * Проверка работоспособности соединения с СУБД
-         * @return bool = true / false
-         */
-		function Check_connection(  )
-		{
-		    # Если еще ни разу не подключались
-            if( ! $this->db )
-                return false;
-
-
-            # Если уже подключались, пробуем выполнить запрос.
-			$this->Query("SELECT VERSION()");
-
-			if( ! $this->Has_error(  ) )
-                return true;
-
-
-            return false;
-
-		}
 
 
 
-        /**
-         * Вывести текстом последнюю ошибку mysqli
-         */
-        public function Echo_error(  )
-        {
-            if ( $this->db->errno != 0 )
-                echo "<hr>Echo_error => (№" . $this->db->errno . ") " . $this->db->error;
-            else
-                echo "<br>Echo_error => Ошибок нет";
-        }
 
-        /**
-         * Произошла ли ошибка?
-         * @return bool = true / false
-         */
-        public function Has_error(  )
-        {
-            if ( $this->db->errno != 0 )
-                return true;
-
-            return false;
-        }
 
 
 

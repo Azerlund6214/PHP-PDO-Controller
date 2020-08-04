@@ -16,8 +16,8 @@
 						#'dbname'   => 'database',
 						#'port'     =>  3306,
 						'charset'  => 'utf8',
-						'username' => 'user',
-						'password' => 'password',
+						'username' => 'root',
+						'password' => 'root',
 					  );
 	
 	
@@ -30,18 +30,16 @@
 	$PDO->Connect( PDO_C::Build_Conn_String($DB_CONFIG), $DB_CONFIG['username'], $DB_CONFIG['password'] );
 	
 	
+	//echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
 	
+	$PDO->Select_db("vk_monitor1");
 	
-	exit("<hr>Exit main");
 	
 	exit("<hr>Exit main.");
-    
-    $DBC = new DB_Controller( $db_host , $db_user , $db_pass );
+ 
 	
-	
-	$DBC->Select_db($db_name);
 
-    //echo ( $DBC->Check_connection() ) ? "yes" :  "no";
+ 
 	
 	$sql = "SELECT * FROM mon_results WHERE id = ? AND post_url = ?";
 	
