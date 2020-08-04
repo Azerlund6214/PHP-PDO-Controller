@@ -16,25 +16,43 @@
     $DBC->Select_db($db_name);
 
     //echo ( $DBC->Check_connection() ) ? "yes" :  "no";
-
-
-
-exit;
-
-
-$my = $DBC->Get_connection();
-
-
-$stmt = $my->prepare( "SELECT count(*) FROM ?" ) ;
-echo "<hr>";
-$stmt->bind_param("s" , "mon_results");
-echo "<hr>";
-$stmt->execute();
-$stmt->close();
-echo $DBC->Get_connection()->info;
-
-
-
+	
+	$sql = "SELECT * FROM mon_results WHERE id = ? AND post_url = ?";
+	$DBC->Prepared_stmt = $DBC->db->prepare( $sql );
+	$DBC->Prepared_stmt->bind_param("is" , 16 , "str");
+	$DBC->Prepared_stmt->execute();
+	
+	$DBC->Prepared_stmt->close();
+	
+	
+	
+	
+	exit;
+	
+	$DBC->Query_prep(  , "is" , 44 , "str");
+	
+	//exit;
+	
+	
+	$my = $DBC->db;
+	
+	
+	$stmt = $my->prepare( "SELECT * FROM ?" ) ;
+	
+	if( ! $stmt )
+	{ //если ошибка - убиваем процесс и выводим сообщение об ошибке.
+	    die( "SQL Error: {$my->errno} - {$my->error}" );
+	}
+	
+	echo "<hr>";
+	$stmt->bind_param("s" , "mon_results");
+	echo "<hr>";
+	$stmt->execute();
+	$stmt->close();
+	echo $DBC->Get_connection()->info;
+	
+	
+	
 
 
     //$DBC->Query_prep("SELECT count(*) FROM '?'" , "s" , "mon_results"  );

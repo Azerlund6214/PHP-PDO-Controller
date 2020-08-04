@@ -5,6 +5,8 @@
 
 		public $db; # Главное подключение к бд
 
+		public $Prepared_stmt; #
+		
 		
 		####################################
 		
@@ -125,18 +127,29 @@
 
 
         /* Не работает, в процессе */
-        public function Query_prep( $sql , $a, ...$args )
+        public function Query_prep_sql( $sql )
         {
-            $my = $this->db;
+			
+            $stmt = $this->db->prepare( $sql ) ;
+			
+            if( ! $stmt )
+                $this->Echo_error();
+			else
+	            $this->Prepared_stmt;
+			
+			
+			
+            print_r($args);
+            //$stmt->bind_param($a , $args);
+            
 
-
-            $stmt = $my->prepare( $sql ) ;
-            echo "<hr>";
-            $stmt->bind_param($a , $args);
-            echo "<hr>";
             $stmt->execute();
+
             $stmt->close();
-            echo $this->db->info;
+    
+
+            echo "<hr>";
+            //echo $this->db->info;
 
         }
 
