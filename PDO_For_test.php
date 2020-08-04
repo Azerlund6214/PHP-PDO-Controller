@@ -9,8 +9,30 @@
 	$DB_NAME   = "vk_monitor";
 	#$DB_PORT   = "000";
 	
+	
+	$DB_CONFIG = array(
+						'dbms'     => 'mysql',
+						'host'     => 'localhost',  # 127.0.0.1
+						#'dbname'   => 'database',
+						#'port'     =>  3306,
+						'charset'  => 'utf8',
+						'username' => 'user',
+						'password' => 'password',
+					  );
+	
+	
+	//var_dump( PDO_C::Build_Conn_String($DB_CONFIG) );
+	
 	// pgsql:host=192.168.137.1;port=5432;dbname=anydb
-	$PDO = new PDO('mysql:host=localhost;dbname=test', $user, $pass);
+	// mysql:host=localhost;dbname=test;charset=utf8
+	$PDO = new PDO_C(  );
+	
+	$PDO->Connect( PDO_C::Build_Conn_String($DB_CONFIG), $DB_CONFIG['username'], $DB_CONFIG['password'] );
+	
+	
+	
+	
+	exit("<hr>Exit main");
 	
 	exit("<hr>Exit main.");
     

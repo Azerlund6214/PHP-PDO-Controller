@@ -1,43 +1,124 @@
 <?php
 
-	class PDO_Controller
+	class PDO_C
 	{
 
-		public $PDO; # Главное подключение к бд
-
+		public $connection; # Главное подключение к бд
 		
-		
-		
-		####################################
-		
-		
-		
-		
-		
-		
-		
-		
+		public $connectionString = null; #
+		public $username = ''; #
+		public $password = ''; #
 		
 		
 		
 		
 		####################################
 		
-		
-		
-		public function Get_connection()
+		/**
+		 * Собирает строку подключения из данных массива.
+		 * @param $Arr_config - массив с данными для подключения
+		 * @return string
+		 */
+		public static function Build_Conn_String( $Arr_config )
 		{
-			return $this -> db;
+			$string  = $Arr_config['dbms']. ":" ;
+			$string .= "host=" . $Arr_config['host'] . ";" ;
+			
+			if( isset( $Arr_config['dbname']  ) ) $string .= "dbname="  . $Arr_config['dbname']  . ";" ;
+			if( isset( $Arr_config['port']    ) ) $string .= "port="    . $Arr_config['port']    . ";" ;
+			if( isset( $Arr_config['charset'] ) ) $string .= "charset=" . $Arr_config['charset'] . ";" ;
+			
+			# Обрезаем лишний ; в конце
+			$string = substr($string, 0, -1);
+			
+			return $string;
+			
+			
+			# pgsql:host=192.168.137.1;port=5432;dbname=anydb
+			# mysql:host=localhost;dbname=test;charset=utf8
+			
+			/*
+				'dbms'     => 'mysql',
+				'host'     => 'localhost',  # 127.0.0.1
+				'dbname'   => 'database',
+				'port'     =>  3306,
+				'charset'  => 'utf8',
+				'username' => 'user',
+				'password' => 'password',
+			*/
+		
 		}
+		
+		
+		/**
+		 * Подключиться к серверу СУБД. Успех либо выход.
+		 * @param $Conn_str - Уже готовая строка подключения
+		 * @param $User
+		 * @param $Pass
+		 */
+		public function Connect( $Conn_str , $User , $Pass  )
+		{
+			
+			try
+			{
+				
+				$this -> connection = new PDO( $Conn_str, $User, $Pass );
+				
+			} catch (PDOException $e) {
+				echo "<hr>Ошибка подключения через PDO.";
+				echo "<br>Строка подключения: "; var_dump($Conn_str);
+				echo "<br>Логин: "; var_dump($User);
+				echo "<br>Пароль: "; var_dump($Pass);
+				echo "<br>Текст ошибки: " . $e->getMessage();
+				
+				echo "<hr>";
+				
+				echo "<pre>"; print_r ($e); echo "</pre>";
+				
+				echo "<hr>";
+				die("PDO->Connect = Выход");
+			}
+			
+			$this -> connectionString = $Conn_str;
+			$this -> username = $User;
+			$this -> password = $Pass;
+			
+		}
+		
+		/**
+		 * Возвращает подключение либо завершает скрипт если его нет.
+		 * @return PDO Connection / Exit
+		 */
+		public function getConnection()
+		{
+			
+			if ( is_null( $this -> connectionString ) )
+				exit ("<hr>PDO->getConnection = Строка подключения пуста, еще ни разу не подключались.<br>Exit");
+			
+			if ( is_null( $this -> connection ) )
+				exit ("<hr>PDO->getConnection = this->connection = NULL.<br>Exit");
+			
+			
+			return $this -> connection;
+		}
+		
+		
+		
+		
+		
+		
+		
+		####################################
+		
+		
 
 
 
-		public function __construct( $host = null , $user = null , $pass = null )
+		public function __construct( $con_str = null , $user = null , $pass = null )
 		{
 
-		    if( $host && $user && $pass )
-                if( ! @$this->Connect($host , $user , $pass) )
-                    exit( "<br>Не удалось подключиться к бд. (из конструктора)" );
+		    if( $con_str && $user && $pass )
+                $this->Connect($con_str , $user , $pass);
 
 		}
 		
@@ -49,40 +130,7 @@
 		
 		
 		
-		/**
-         * Подключиться к серверу СУБД
-         * @param string $host
-         * @param string $user
-         * @param string $pass
-         * @return bool - true / false
-         */
-        public function Connect( $host , $user , $pass  )
-		{
-			
-			// MySQLi, процедурная часть
-			//$mysqli = mysqli_connect('localhost','username','password','database');
 
-			// MySQLi, ООП
-			$mysqli = new mysqli( $host , $user , $pass );
-
-			
-			if ($mysqli->connect_errno)
-			{
-				echo "<hr>Не удалось подключиться к MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
-				return false;
-			}
-			
-			$mysqli->set_charset( "utf8" );
-			
-			
-			$this -> db = $mysqli;
-			
-
-				
-
-			
-			return true;
-		}
 
 
         /**
