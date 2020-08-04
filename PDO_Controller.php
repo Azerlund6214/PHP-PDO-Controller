@@ -240,20 +240,51 @@
 		}
 		
 		
-		
-		
-		public function execute($query, $parameters = array( ) )
+		/**
+		 * Выводит МНОГО строк в асоциативном массиве [0,1,2...][имя столбца]=>значение
+		 * Это метод для SELECT !!!!!
+		 * @param $query
+		 * @param array $parameters
+		 * @return array|string
+		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
+		 */
+		public function Query($query, $parameters = array( ) )
 		{
 			$con = $this->getConnection();
 			
 			$statement = $con->prepare($query);
-			$result = $statement->execute($parameters);
+			$statement->execute($parameters);
 			
-			if (preg_match('/^\s*INSERT\s/i', $query)) {
-				return $con->lastInsertId();
-			} else {
-				return $result;
-			}
+			# TODO: Тут проверка на ошибку.
+
+			return $statement->fetchAll(PDO::FETCH_ASSOC);
+			
+		}
+		
+		/**
+ 		 * Выполняет изменение данных
+		 * Это метод для INSERT, UPDATE, DELETE, и подобного !!!!!
+		 * Возвращает количество затронутых строк.
+		 * @param $query
+		 * @param array $parameters
+		 * @return int
+		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
+		 */
+		public function Execute($query, $parameters = array( ) )
+		{
+			
+			$con = $this->getConnection();
+			
+			$statement = $con->prepare($query);
+			$statement->execute($parameters);
+			
+			# TODO: Тут проверка на ошибку.
+			
+			return $statement->rowCount();
+			
+			#if ( preg_match('/^\s*INSERT\s/i', $query) )
+			#	return $con->lastInsertId();
+
 		}
 		
 		
@@ -310,70 +341,6 @@
 			$this->db -> query( $sql );
 		
 		}
-
-
-
-
-
-        /* Не работает, в процессе */
-        public function Query_prep_sql( $sql )
-        {
-			
-            $stmt = $this->db->prepare( $sql ) ;
-			
-            if( ! $stmt )
-                $this->Echo_error();
-			else
-	            $this->Prepared_stmt;
-			
-			
-			
-            print_r($args);
-            //$stmt->bind_param($a , $args);
-            
-
-            $stmt->execute();
-
-            $stmt->close();
-    
-
-            echo "<hr>";
-            //echo $this->db->info;
-
-        }
-
-
-        /* Сделать метод фетча статичным */
-
-        /**
-         * Выполнить запрос и вернуть результат
-         * @param string $sql
-         * @param string $fetch_type = all / assoc
-         * @return mixed
-         * TODO: Добавить другие виды фетчей
-         * TODO: Добавить реакцию на ошибку в запросе(неудачный запрос при кривом sql)
-         */
-		public function Query( $sql , $fetch_type = "all" )
-		{
-			
-			$result = $this->db -> query( $sql );
-			#print_r("Select вернул ". $result->num_rows ." строк.");
-
-            # В этом месте будет отлов ошибки запроса
-
-            //$this-> Get_error();
-
-			switch( $fetch_type )
-			{
-				case "all":    return $result -> fetch_all();  break;
-				case "assoc": return  $result-> fetch_assoc(); break;
-				
-				default: exit("Невалидный fetch_type");
-			}
-
-
-		}
-
 
 
 

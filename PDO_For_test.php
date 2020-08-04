@@ -37,11 +37,11 @@
 	
  
 	
-	$sql = "SELECT * FROM mon_results WHERE id = :id"; // AND post_url = ?";
+	$sql = "SELECT * FROM mon_results WHERE id <= :id"; // AND post_url = ?";
 	
     echo "<pre>";
 	print_r( $PDO->getRow($sql , [':id'=>90] ) );
-	print_r( $PDO->execute($sql , [':id'=>90] ) );
+	print_r( $PDO->Query($sql , [':id'=>90] ) );
     echo "</pre>";
 	
     
