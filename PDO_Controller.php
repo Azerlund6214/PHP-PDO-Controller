@@ -10,7 +10,7 @@
 		public $password = ''; #
 		
 		
-		
+		public $last_statement = ""; # Результат последнего запроса. Очищается после забора данных в fetcher()
 		
 		####################################
 		
@@ -224,6 +224,58 @@
 		
 		# TODO: Объединить все 3 метода в один и добавить
 		
+		public function fetcher( $mode = "Assoc" )
+		{
+			$stmt = $this->last_statement;
+			
+			if ( ! $stmt )
+				return "Last statement is empty (null).";
+			
+			
+			
+			switch ( strtolower( $mode ) )
+			{
+				case "a":
+				case "as":
+				case "ass":
+				case "assoc":
+					return $stmt->fetchAll( PDO::FETCH_ASSOC );
+					# Массив со всеми строками [0,1,2...][имя столбца]=>значение
+	
+				case "o":
+				case "one":
+				case "row":
+				case "onerow":
+				case "one_row":
+					return $stmt->fetch( PDO::FETCH_ASSOC );
+					# ОДНА строка (первая из набора)
+				
+				case "c":
+				case "count":
+				case "rowcount":
+				case "row_count":
+					return $stmt->rowCount(  );
+					# Число строк в последнем запросе
+				
+				
+				default: exit( "<hr>PDO->fetcher() - Выпал case-default = $mode" );
+			}
+			
+			
+			
+			
+			
+			
+			
+			#if ( preg_match('/^\s*INSERT\s/i', $query) )
+			#	return $con->lastInsertId();
+			
+			
+			
+		}
+		
+		
+		
 		
 		
 		
@@ -266,7 +318,8 @@
 			
 			# TODO: Тут проверка на ошибку.
 
-			return $statement->fetchAll(PDO::FETCH_ASSOC);
+			$this->last_statement = $statement;
+			
 			
 		}
 		

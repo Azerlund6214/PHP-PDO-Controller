@@ -46,6 +46,9 @@
 	#print_r( $PDO->getRow($sql , [':id'=>90] ) );
 	print_r( $PDO->Query($sql , [':id'=>87] ) );
 	//print_r( $PDO->Execute( $sql ) );
+	print_r( $PDO->fetcher( "Ass" ) );
+	
+	
     echo "</pre>";
 	
     
