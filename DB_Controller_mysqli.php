@@ -59,7 +59,7 @@
 			
 
 				
-			//echo $mysqli->host_info . "\n";
+
 			
 			return true;
 		}
@@ -70,7 +70,11 @@
          */
 		public function Disconnect( )
 		{
+		    // Нужна проверка что если уже закрыто или пустое
+
 			$this->db->close();
+			$this->db = null;
+
 		}
 
 
@@ -87,6 +91,57 @@
 			$this->db -> query( $sql );
 		
 		}
+
+
+        /**
+         * Метод экранирует все неподобающие символы в присланной строке.
+         * @param $param - Строка, которую надо экранировать
+         * @return mixed
+         */
+        public function Get_escaped_string( $param )
+        {
+            //$escaped = $this->db->real_escape_string( $var );
+            /* https://www.php.net/manual/ru/mysqli.real-escape-string */
+
+
+            //$more_escaped = addcslashes($escaped, '%_');
+
+            return preg_replace('~[\x00\x0A\x0D\x1A\x22\x25\x27\x5C\x5F]~u', '\\\$0', $param);
+
+            /*
+                00 = \0 (NUL)
+                0A = \n
+                0D = \r
+                1A = ctl-Z
+                22 = "
+                25 = %
+                27 = '
+                5C = \
+                5F = _
+                # Note: preg_replace() is in PCRE_UTF8 (UTF-8) mode (`u`).
+            */
+
+        }
+
+
+        /* Не работает, в процессе */
+        public function Query_prep( $sql , $a, ...$args )
+        {
+            $my = $this->db;
+
+
+            $stmt = $my->prepare( $sql ) ;
+            echo "<hr>";
+            $stmt->bind_param($a , $args);
+            echo "<hr>";
+            $stmt->execute();
+            $stmt->close();
+            echo $this->db->info;
+
+        }
+
+
+        /* Сделать метод фетча статичным */
 
         /**
          * Выполнить запрос и вернуть результат
@@ -130,12 +185,24 @@
 
         /**
          * Проверка работоспособности соединения с СУБД
-         * Выведет версию СУБД и выйдет.
+         * @return bool = true / false
          */
-		function Check_connection()
+		function Check_connection(  )
 		{
-			echo $this->Query('SELECT VERSION()')[0][0];
-			exit;
+		    # Если еще ни разу не подключались
+            if( ! $this->db )
+                return false;
+
+
+            # Если уже подключались, пробуем выполнить запрос.
+			$this->Query("SELECT VERSION()");
+
+			if( ! $this->Has_error(  ) )
+                return true;
+
+
+            return false;
+
 		}
 
 
@@ -173,7 +240,7 @@
 
 
 
-        
+
 		
 		/*
 			$query = $mysqli->prepare('
