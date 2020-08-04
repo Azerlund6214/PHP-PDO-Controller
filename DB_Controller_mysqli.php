@@ -13,9 +13,16 @@
 		{
 			return $this -> db;
 		}
-		
-		public function __construct()
-		{	//exit("123");
+
+
+
+		public function __construct( $host = null , $user = null , $pass = null )
+		{
+
+		    if( $host && $user && $pass )
+                if( ! @$this->Connect($host , $user , $pass) )
+                    exit( "<br>Не удалось подключиться к бд. (из конструктора)" );
+
 		}
 		
 
@@ -27,7 +34,7 @@
          * @param string $host
          * @param string $user
          * @param string $pass
-         * @return bool - true либо exit()
+         * @return bool - true / false
          */
         public function Connect( $host , $user , $pass  )
 		{
@@ -41,8 +48,8 @@
 			
 			if ($mysqli->connect_errno)
 			{
-				echo "Не удалось подключиться к MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
-				exit;
+				echo "<hr>Не удалось подключиться к MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
+				return false;
 			}
 			
 			$mysqli->set_charset( "utf8" );
@@ -67,30 +74,7 @@
 		}
 
 
-        /**
-         * Вывести последнюю ошибку mysqli
-         * @param bool $need_bool - Возвращать значение или просто сделать echo
-         * @return bool или ничего
-         */
-		public function Get_error( $need_bool = false )
-		{
-			if ( $this->db->errno != 0 )
-			{
-                if($need_bool)
-                    return true;
 
-                echo "Get_error => (№" . $this->db->errno . ") " . $this->db->error;
-            }
-			else
-			{
-                if($need_bool)
-                    return false;
-
-                echo "Get_error => Ошибок нет";
-            }
-
-
-		}
 		
 		
         /**
@@ -148,14 +132,48 @@
          * Проверка работоспособности соединения с СУБД
          * Выведет версию СУБД и выйдет.
          */
-		function test_conn()
+		function Check_connection()
 		{
 			echo $this->Query('SELECT VERSION()')[0][0];
 			exit;
 		}
-		
-		
-		
+
+
+
+        /**
+         * Вывести текстом последнюю ошибку mysqli
+         */
+        public function Echo_error(  )
+        {
+            if ( $this->db->errno != 0 )
+                echo "<hr>Echo_error => (№" . $this->db->errno . ") " . $this->db->error;
+            else
+                echo "<br>Echo_error => Ошибок нет";
+        }
+
+        /**
+         * Произошла ли ошибка?
+         * @return bool = true / false
+         */
+        public function Has_error(  )
+        {
+            if ( $this->db->errno != 0 )
+                return true;
+
+            return false;
+        }
+
+
+
+
+
+
+
+
+
+
+
+        
 		
 		/*
 			$query = $mysqli->prepare('
