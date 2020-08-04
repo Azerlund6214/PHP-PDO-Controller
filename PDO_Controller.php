@@ -221,6 +221,40 @@
 		####################################
 		###
 		
+		/**
+		 * Выводит ОДНУ строку в асоциативном массиве [имя столбца]=>значение
+		 * @param $query
+		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
+		 * @param int $mode
+		 * @return mixed
+		 */
+		public function getRow( $query, $parameters = array( ), $mode = PDO::FETCH_ASSOC)
+		{
+			$con = $this->getConnection();
+			
+			$statement = $con->prepare($query);
+			$statement->execute($parameters);
+			
+			return $statement->fetch($mode);
+		
+		}
+		
+		
+		
+		
+		public function execute($query, $parameters = array( ) )
+		{
+			$con = $this->getConnection();
+			
+			$statement = $con->prepare($query);
+			$result = $statement->execute($parameters);
+			
+			if (preg_match('/^\s*INSERT\s/i', $query)) {
+				return $con->lastInsertId();
+			} else {
+				return $result;
+			}
+		}
 		
 		
 		

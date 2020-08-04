@@ -32,16 +32,22 @@
 	
 	//echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
 	
-	$PDO->Select_db("vk_monitor1");
+	$PDO->Select_db("vk_monitor");
 	
 	
+ 
+	
+	$sql = "SELECT * FROM mon_results WHERE id = :id"; // AND post_url = ?";
+	
+    echo "<pre>";
+	print_r( $PDO->getRow($sql , [':id'=>90] ) );
+	print_r( $PDO->execute($sql , [':id'=>90] ) );
+    echo "</pre>";
+	
+    
+    
+    
 	exit("<hr>Exit main.");
- 
-	
-
- 
-	
-	$sql = "SELECT * FROM mon_results WHERE id = ? AND post_url = ?";
 	
 	
 	if( ! $stmt )
