@@ -13,7 +13,7 @@
 	$DB_CONFIG = array(
 						'dbms'     => 'mysql',
 						'host'     => 'localhost',  # 127.0.0.1
-						#'dbname'   => 'database',
+						'dbname'   => 'vk_monitor',
 						#'port'     =>  3306,
 						'charset'  => 'utf8',
 						'username' => 'root',
@@ -32,50 +32,33 @@
 	
 	//echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
 	
-	$PDO->Select_db("vk_monitor");
+	//$PDO->Select_db("vk_monitor");
 	
 	
  
 	
 	$sql = "SELECT * FROM mon_results WHERE id <= :id"; // AND post_url = ?";
+	//$sql = "UPDATE mon_results SET post_url='123' WHERE id >= 377 "; // AND post_url = ?";
+	
+	
 	
     echo "<pre>";
-	print_r( $PDO->getRow($sql , [':id'=>90] ) );
-	print_r( $PDO->Query($sql , [':id'=>90] ) );
+	#print_r( $PDO->getRow($sql , [':id'=>90] ) );
+	print_r( $PDO->Query($sql , [':id'=>87] ) );
+	//print_r( $PDO->Execute( $sql ) );
     echo "</pre>";
 	
+    
+
     
     
     
 	exit("<hr>Exit main.");
 	
-	
-	if( ! $stmt )
-	{ //если ошибка - убиваем процесс и выводим сообщение об ошибке.
-	
-	}
-	
-	echo "<hr>";
-	
-	echo "<hr>";
-	
-	
-	
-
-
-    //$DBC->Query_prep("SELECT count(*) FROM '?'" , "s" , "mon_results"  );
-
-
-    //mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-
-    echo "<hr>End";
 
 
     /*
 
-
-    $con = mysqli_connect($DB_SERVER, $DB_USER_READER, $DB_PASS_READER, $DB_NAME, $DB_PORT);
      */
 
 ?>

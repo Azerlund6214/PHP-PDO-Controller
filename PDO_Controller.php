@@ -221,12 +221,19 @@
 		####################################
 		###
 		
+		
+		# TODO: Объединить все 3 метода в один и добавить
+		
+		
+		
+		
 		/**
 		 * Выводит ОДНУ строку в асоциативном массиве [имя столбца]=>значение
 		 * @param $query
 		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
 		 * @param int $mode
 		 * @return mixed
+		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
 		 */
 		public function getRow( $query, $parameters = array( ), $mode = PDO::FETCH_ASSOC)
 		{
@@ -234,6 +241,8 @@
 			
 			$statement = $con->prepare($query);
 			$statement->execute($parameters);
+			
+			# TODO: Тут проверка на ошибку.
 			
 			return $statement->fetch($mode);
 		
@@ -244,11 +253,11 @@
 		 * Выводит МНОГО строк в асоциативном массиве [0,1,2...][имя столбца]=>значение
 		 * Это метод для SELECT !!!!!
 		 * @param $query
-		 * @param array $parameters
+		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
 		 * @return array|string
 		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
 		 */
-		public function Query($query, $parameters = array( ) )
+		public function Query( $query , $parameters = array( ) )
 		{
 			$con = $this->getConnection();
 			
@@ -266,11 +275,11 @@
 		 * Это метод для INSERT, UPDATE, DELETE, и подобного !!!!!
 		 * Возвращает количество затронутых строк.
 		 * @param $query
-		 * @param array $parameters
-		 * @return int
+		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
+		 * @return int = Число затронутых строк
 		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
 		 */
-		public function Execute($query, $parameters = array( ) )
+		public function Execute( $query , $parameters = array( ) )
 		{
 			
 			$con = $this->getConnection();
