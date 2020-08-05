@@ -38,10 +38,11 @@
 	
     echo "<pre>";
 	#print_r( $PDO->getRow($sql , [':id'=>90] ) );
-	print_r( $PDO->Query($sql , [':id'=>87] ) );
-	//print_r( $PDO->Execute( $sql ) );
-	print_r( $PDO->fetcher( "c" ) );
-	print_r( $PDO->fetcher( "row" ) );
+	print_r( $PDO->Query($sql , [':id'=>88] ) );
+	#print_r( $PDO->Execute( $sql ) );
+	#print_r( $PDO->fetcher( "c" ) );
+	#print_r( $PDO->fetcher( "row" ) );
+	print_r( $PDO->fetcher( "all" ) );
 	
 	
     echo "</pre>";

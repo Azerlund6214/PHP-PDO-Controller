@@ -76,6 +76,9 @@
 				
 				$this -> connection = new PDO( $Conn_str, $User, $Pass );
 				
+				# Что бы выводились ошибки от PDO
+				//$this -> connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				
 			} catch (PDOException $e) {
 				echo "<hr>Ошибка подключения через PDO.";
 				echo "<br>Строка подключения: "; var_dump($Conn_str);
@@ -231,18 +234,31 @@
 		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
 		 * @return array|string
 		 * # TODO: ПРОВЕРИТЬ отлов ошибок!!!
+		 * # TODO: ОТЛОВ НЕ РАБОТАЕТ - ДОДЕЛАТЬ.  См строку возле создания подключения!!!
 		 */
 		public function Query( $query , $parameters = array( ) )
 		{
 			$con = $this->getConnection();
 			
-			$statement = $con->prepare($query);
-			$statement->execute($parameters);
+			#try			{
+				$statement = $con->prepare($query);
+				$statement->execute($parameters);
+				
+				//var_dump($var);
+				//exit;
 			
+			#} catch (PDOException $e) {
 			
 			# Проверка на ошибку в запросе.
 			if( $this->Has_error() )
 				$this->Echo_error( true ); # Вывести инфу и ВЫЙТИ
+				
+			#	if ($e->getCode() == '2A000')
+			#		echo "Syntax Error: ".$e->getMessage();
+			#}
+			
+			//echo "123";
+			
 			
 			$this->last_statement = $statement;
 			
@@ -323,98 +339,31 @@
 		
 		
 		
-		
-		
-		
-		/**
-		 * Выводит ОДНУ строку в асоциативном массиве [имя столбца]=>значение
-		 * @param $query
-		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
-		 * @param int $mode
-		 * @return mixed
-		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
-		 */
-		public function getRow( $query, $parameters = array( ), $mode = PDO::FETCH_ASSOC)
-		{
-			$con = $this->getConnection();
-			
-			$statement = $con->prepare($query);
-			$statement->execute($parameters);
-			
-			# TODO: Тут проверка на ошибку.
-			
-			return $statement->fetch($mode);
-		
-		}
-		
-		
-
-		
-
-		
-		
-		####################################
-		###
-		
-		
-		
-		
-		####################################
-		###
-		
-		
-		
-		/*
-	$pdo = new PDO (whatever);
-	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	try {
-		$pdo->exec ("QUERY WITH SYNTAX ERROR");
-	} catch (PDOException $e) {
-		if ($e->getCode() == '2A000')
-			echo "Syntax Error: ".$e->getMessage();
-	}
-*/
-		
-		
-
-
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-
-
-
-		
 	
+		
 
+		
 
-
-
-
-
-
-
-
-
-
-
+		
+		
+		####################################
+		###
+		
+		/*
+			Просто примеры различных запросов, что бы не искать
+			SELECT col1, col2, col3 FROM tablename WHERE col4=? LIMIT ?
+			SELECT name, colour, calories      FROM fruit  	WHERE colour = :colour
+			UPDATE my_table SET fname = ?, lname = ? WHERE id = ?
+			INSERT INTO fruits( name, colour )    	VALUES( :name, ":colour" )
+			INSERT INTO table (name, length, price)    VALUES (?,?,?)
+		*/
+		
+		####################################
+		###
 
 
 
 		
-		/*
-
-  
-		*/
 		
 		
 		
