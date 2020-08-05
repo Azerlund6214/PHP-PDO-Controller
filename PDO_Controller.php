@@ -10,7 +10,8 @@
 		public $password = ''; #
 		
 		
-		public $last_statement = ""; # Результат последнего запроса. Очищается после забора данных в fetcher()
+		public $last_statement = ""; # Результат последнего запроса. Висит в памяти, поэтому не держать крупные запросы.
+		
 		
 		####################################
 		
@@ -222,8 +223,38 @@
 		###
 		
 		
-		# TODO: Объединить все 3 метода в один и добавить
+		/**
+		 * Исполняет запрос с параметрами (и без них)
+		 * Результат получаестся в отдельном методе ->fetcher() !!!!!
+		 * Если запрос не прошел, то будет выведена подробная ошибка и ВЫХОД
+		 * @param $query
+		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
+		 * @return array|string
+		 * # TODO: ПРОВЕРИТЬ отлов ошибок!!!
+		 */
+		public function Query( $query , $parameters = array( ) )
+		{
+			$con = $this->getConnection();
+			
+			$statement = $con->prepare($query);
+			$statement->execute($parameters);
+			
+			
+			# Проверка на ошибку в запросе.
+			if( $this->Has_error() )
+				$this->Echo_error( true ); # Вывести инфу и ВЫЙТИ
+			
+			$this->last_statement = $statement;
+			
+		}
 		
+		
+		/**
+		 * Выдает результат последней выборки в удобном виде.
+		 * Если выборка была большая, то после желательно вызвать ->Clear_Last_Stmt()
+		 * @param string $mode
+		 * @return array|int
+		 */
 		public function fetcher( $mode = "Assoc" )
 		{
 			$stmt = $this->last_statement;
@@ -238,9 +269,13 @@
 				case "a":
 				case "as":
 				case "ass":
+				case "all":
 				case "assoc":
 					return $stmt->fetchAll( PDO::FETCH_ASSOC );
-					# Массив со всеми строками [0,1,2...][имя столбца]=>значение
+					# [0,1,2...][имя столбца]=>значение
+					# Массив со всеми строками результата
+					# МНОГО строк в асоциативном массиве
+					# SELECT много
 	
 				case "o":
 				case "one":
@@ -248,30 +283,42 @@
 				case "onerow":
 				case "one_row":
 					return $stmt->fetch( PDO::FETCH_ASSOC );
+					# [имя столбца]=>значение
 					# ОДНА строка (первая из набора)
+					# SELECT с WHERE или когда нужна любая строка из таблицы
 				
 				case "c":
 				case "count":
 				case "rowcount":
+				case "countrows":
 				case "row_count":
 					return $stmt->rowCount(  );
+					# 4 / 50 / 0 ...
 					# Число строк в последнем запросе
+					# Для INSERT, UPDATE, DELETE
+				
+				case "l":
+				case "last":
+				case "id":
+				case "lastid":
+					return $this->getConnection()->lastInsertId();
+					# id последней вставленной записи
+					#if ( preg_match('/^\s*INSERT\s/i', $query) )
 				
 				
 				default: exit( "<hr>PDO->fetcher() - Выпал case-default = $mode" );
 			}
 			
-			
-			
-			
-			
-			
-			
-			#if ( preg_match('/^\s*INSERT\s/i', $query) )
-			#	return $con->lastInsertId();
-			
-			
-			
+		
+		}
+		
+		
+		/**
+		 * Очищает результаты последнего запроса. (что бы не висел в памяти класса)
+		 */
+		public function Clear_Last_Stmt(  )
+		{
+			$this->last_statement = null;
 		}
 		
 		
@@ -301,54 +348,9 @@
 		}
 		
 		
-		/**
-		 * Выводит МНОГО строк в асоциативном массиве [0,1,2...][имя столбца]=>значение
-		 * Это метод для SELECT !!!!!
-		 * @param $query
-		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
-		 * @return array|string
-		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
-		 */
-		public function Query( $query , $parameters = array( ) )
-		{
-			$con = $this->getConnection();
-			
-			$statement = $con->prepare($query);
-			$statement->execute($parameters);
-			
-			# TODO: Тут проверка на ошибку.
 
-			$this->last_statement = $statement;
-			
-			
-		}
 		
-		/**
- 		 * Выполняет изменение данных
-		 * Это метод для INSERT, UPDATE, DELETE, и подобного !!!!!
-		 * Возвращает количество затронутых строк.
-		 * @param $query
-		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
-		 * @return int = Число затронутых строк
-		 * # TODO: Вписать проверку на ошибку при запросе (if с Has_error Echo_error).
-		 */
-		public function Execute( $query , $parameters = array( ) )
-		{
-			
-			$con = $this->getConnection();
-			
-			$statement = $con->prepare($query);
-			$statement->execute($parameters);
-			
-			# TODO: Тут проверка на ошибку.
-			
-			return $statement->rowCount();
-			
-			#if ( preg_match('/^\s*INSERT\s/i', $query) )
-			#	return $con->lastInsertId();
 
-		}
-		
 		
 		
 		####################################
@@ -392,19 +394,7 @@
 
 
 		
-		
-        /**
-         * Выполнить запрос БЕЗ возвращаемого результата
-         * @param $sql
-         * TODO: Добавить реакцию на ошибку в запросе(неудачный запрос при кривом sql)
-         */
-		public function Exec( $sql )
-		{
-			$this->db -> query( $sql );
-		
-		}
-
-
+	
 
 
 
@@ -422,38 +412,8 @@
 
 		
 		/*
-			$query = $mysqli->prepare('
-			SELECT * FROM users
-			WHERE username = ?
-			AND email = ?
-			AND last_login > ?');
-			  
-			$query->bind_param('sss', 'test', $mail, time() - 3600);
-			$query->execute();
-			
-			
-			
-            // MySQLi, ООП
-            if ($result = $mysqli->query($query))
-            {
-               while ($user = $result->fetch_object('User'))
-               {
-                  echo $user->info()."\n";
-               }
-            }
 
-
-
-
-            // MySQLi, "ручная" зачистка параметра
-            $username = mysqli_real_escape_string($_GET['username']);
-            $mysqli->query("SELECT * FROM users WHERE username = '$username'");
-
-            // mysqli, подготовленные выражения
-            $query = $mysqli->prepare('SELECT * FROM users WHERE username = ?');
-            $query->bind_param('s', $_GET['username']);
-            $query->execute();
-
+  
 		*/
 		
 		

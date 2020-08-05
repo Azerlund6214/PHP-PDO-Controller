@@ -3,12 +3,6 @@
 
     include "PDO_Controller.php";
 	
-	$DB_SERVER = "localhost"; # 127.0.0.1
-	$DB_USER   = "root";
-	$DB_PASS   = "root";
-	$DB_NAME   = "vk_monitor";
-	#$DB_PORT   = "000";
-	
 	
 	$DB_CONFIG = array(
 						'dbms'     => 'mysql',
@@ -46,7 +40,8 @@
 	#print_r( $PDO->getRow($sql , [':id'=>90] ) );
 	print_r( $PDO->Query($sql , [':id'=>87] ) );
 	//print_r( $PDO->Execute( $sql ) );
-	print_r( $PDO->fetcher( "Ass" ) );
+	print_r( $PDO->fetcher( "c" ) );
+	print_r( $PDO->fetcher( "row" ) );
 	
 	
     echo "</pre>";
