@@ -19,11 +19,10 @@
     
     // pgsql:host=192.168.137.1;port=5432;dbname=anydb
     // mysql:host=localhost;dbname=test;charset=utf8
-    $PDO = new PDO_C(  );
+    $PDO = new PDO_C( PDO_C::buildConnString($DB_CONFIG), $DB_CONFIG['username'], $DB_CONFIG['password'] );
     
-    $PDO->connect( PDO_C::buildConnString($DB_CONFIG), $DB_CONFIG['username'], $DB_CONFIG['password'] );
-    
-    
+	
+	
     //echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
     
     //$PDO->Select_db("vk_monitor");
