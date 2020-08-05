@@ -73,6 +73,15 @@
          */
         public function connect( $Conn_str , $User , $Pass  )
         {
+            /*
+            $opt = [
+                        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_EMULATE_PREPARES   => false
+                    ];
+            $connection = new PDO($this->connection_string, $user, $pass, $opt);
+            */
+            
             
             try
             {
@@ -361,6 +370,11 @@
             
         }
     
+    
+    
+        ####################################
+        ### Получение схемы бд в виде массива.
+        
         public function getTableColumns( $target_table )
         {
             $this->query("SHOW COLUMNS FROM $target_table");
@@ -417,15 +431,51 @@
             foreach ($arr_tables as $table_name)
                 foreach ( $this->getTableColumns($table_name) as $columns_arr )
                     $final_arr[$table_name] []= $columns_arr;
-    
                 
-            echo "<pre>";
-            print_r ( $final_arr );
-            echo "</pre>";
+            return $final_arr;
+                
+            #echo "<pre>";
+            #print_r ( $final_arr );
+            #echo "</pre>";
             
-            exit("<hr>Exit - getDbScheme()");
+            //echo("<hr>getDbScheme() была сменена текущая бд");
         }
     
+        public function getDbList(  )
+        {
+            $this->query("SHOW DATABASES");
+    
+            if( $this->haveError() )
+                $this->echoError( true ); # Вывести инфу и ВЫЙТИ
+    
+            $result = $this->fetcher("assoc");
+            //return $result;
+            $final_arr = array();
+    
+            foreach ($result as $one)
+                foreach ($one as $key => $val)
+                {
+                    if ($val === "mysql" || $val === "performance_schema" || $val === "information_schema")
+                        continue;
+                    
+                    $final_arr  [] = $val;
+                }
+            return $final_arr;
+            
+        }
+    
+        public function getAllServerDbSchemes(  )
+        {
+    
+            $final = array();
+            foreach ( $this->getDbList(  ) as $db_name)
+                $final[$db_name] = $this->getDbScheme( $db_name ) ;
+    
+            return $final;
+        
+        }
+        
+        
         ####################################
         ###
         
@@ -436,6 +486,20 @@
             UPDATE my_table SET fname = ?, lname = ? WHERE id = ?
             INSERT INTO fruits( name, colour )    	VALUES( :name, ":colour" )
             INSERT INTO table (name, length, price)    VALUES (?,?,?)
+        */
+        
+        /*
+            SHOW DATABASES; - список баз данных
+            SHOW TABLES [FROM db_name]; -  список таблиц в базе
+            SHOW COLUMNS FROM таблица [FROM db_name]; - список столбцов в таблице
+            SHOW CREATE TABLE table_name; - показать структуру таблицы в формате "CREATE TABLE"
+            SHOW INDEX FROM tbl_name; - список индексов
+            SHOW GRANTS FOR user [FROM db_name]; - привилегии для пользователя.
+        
+            SHOW VARIABLES; - значения системных переменных
+            SHOW [FULL] PROCESSLIST; - статистика по mysqld процессам
+            SHOW STATUS; - общая статистика
+            SHOW TABLE STATUS [FROM db_name]; - статистика по всем таблицам в базе
         */
         
         ####################################

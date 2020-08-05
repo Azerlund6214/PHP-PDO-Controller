@@ -29,15 +29,16 @@
     
     echo "<pre>";
     
-    
-    //print_r ( $PDO->getDbScheme( "redirector" ) );
-    //print_r ( $PDO->getDbTables(  ) );
     //print_r ( $PDO->getTableColumns("mon_results" ) );
+    //print_r ( $PDO->getDbTables(  ) );
+    //print_r ( $PDO->getDbScheme( "redirector" ) );
+    //print_r ( $PDO->getDbList(  ) );
+    print_r ( $PDO->getAllServerDbSchemes() );
     
     
     echo "</pre>";
     
-    exit("123");
+    exit("<hr>123");
     
     
     
