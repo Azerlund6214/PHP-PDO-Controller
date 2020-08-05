@@ -171,7 +171,7 @@
 			
 			$con->exec("USE $target_db");
 			
-			if( $this->Has_error() )
+			if( $this->Have_error() )
 				$this->Echo_error( true ); # Вывести инфу и ВЫЙТИ
 			
 		}
@@ -181,7 +181,19 @@
 		### Исключения и отладка.
 		
 		/**
-		 * Вывести текстом последнюю ошибку mysqli
+		 * Произошла ли ошибка?
+		 * @return bool = true / false
+		 */
+		public function Have_error(  )
+		{
+			if ( $this->connection->errorCode() != "00000" )
+				return true;
+			
+			return false;
+		}
+		
+		/**
+		 * Вывести текстом последнюю ошибку PDO
 		 * @param bool $Exit_after_echo - Завершить скрипт после вывода
 		 */
 		public function Echo_error( $Exit_after_echo = false )
@@ -209,18 +221,51 @@
 				exit("<hr>PDO->Echo_error - Exit_after_echo=true");
 		}
 		
+
+		
+		
+		
+		
 		/**
 		 * Произошла ли ошибка?
 		 * @return bool = true / false
 		 */
-		public function Has_error(  )
+		public function Have_query_error( $stmt )
 		{
-			if ( $this->connection->errorCode() != "00000" )
+			if ( $stmt->errorCode() != "00000" )
 				return true;
 			
 			return false;
 		}
 		
+		/**
+		 * Вывести текстом последнюю ошибку PDO
+		 * @param bool $Exit_after_echo - Завершить скрипт после вывода
+		 * TODO: Подумать как объединить методы для ошибок
+		 */
+		public function Echo_query_error( $stmt , $Exit_after_echo = false )
+		{
+			# https://www.php.net/manual/ru/pdo.errorinfo.php
+			# https://www.php.net/manual/ru/pdo.errorcode.php
+			
+
+			if ( $stmt->errorCode() != "00000" )
+			{
+				echo "<hr>Echo_error => Есть ошибки." ;
+				echo "<br><br>PDO::errorCode() => " . $stmt->errorCode() ;
+				echo "<br>PDO::errorInfo() [2] => " . $stmt->errorInfo()[2] ;
+				
+				echo "<br><br>PDO::errorInfo() => " ;
+				echo "<pre>"; print_r ( $stmt->errorInfo() ); echo "</pre>";
+				
+			}
+			else
+				echo "<br>Echo_error => Ошибок нет";
+			
+			
+			if ( $Exit_after_echo )
+				exit("<hr>PDO->Echo_error - Exit_after_echo=true");
+		}
 		
 		####################################
 		###
@@ -240,25 +285,13 @@
 		{
 			$con = $this->getConnection();
 			
-			#try			{
-				$statement = $con->prepare($query);
-				$statement->execute($parameters);
-				
-				//var_dump($var);
-				//exit;
-			
-			#} catch (PDOException $e) {
+			$statement = $con->prepare($query);
+			$statement->execute($parameters);
 			
 			# Проверка на ошибку в запросе.
-			if( $this->Has_error() )
-				$this->Echo_error( true ); # Вывести инфу и ВЫЙТИ
-				
-			#	if ($e->getCode() == '2A000')
-			#		echo "Syntax Error: ".$e->getMessage();
-			#}
-			
-			//echo "123";
-			
+			if( $this->Have_query_error( $statement ) )
+				$this->Echo_query_error( $statement, true ); # Вывести инфу и ВЫЙТИ
+
 			
 			$this->last_statement = $statement;
 			
