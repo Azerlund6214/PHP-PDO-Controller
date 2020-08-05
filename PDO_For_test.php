@@ -21,7 +21,7 @@
 	// mysql:host=localhost;dbname=test;charset=utf8
 	$PDO = new PDO_C(  );
 	
-	$PDO->Connect( PDO_C::Build_Conn_String($DB_CONFIG), $DB_CONFIG['username'], $DB_CONFIG['password'] );
+	$PDO->connect( PDO_C::buildConnString($DB_CONFIG), $DB_CONFIG['username'], $DB_CONFIG['password'] );
 	
 	
 	//echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
@@ -37,9 +37,7 @@
 	
 	
     echo "<pre>";
-	#print_r( $PDO->getRow($sql , [':id'=>90] ) );
-	print_r( $PDO->Query($sql , [':id'=>88] ) );
-	#print_r( $PDO->Execute( $sql ) );
+	print_r( $PDO->query($sql , [':id'=>88] ) );
 	#print_r( $PDO->fetcher( "c" ) );
 	#print_r( $PDO->fetcher( "row" ) );
 	print_r( $PDO->fetcher( "all" ) );

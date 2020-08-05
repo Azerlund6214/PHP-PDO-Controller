@@ -3,14 +3,17 @@
 	class PDO_C
 	{
 
-		public $connection; # Главное подключение к бд. Получать через getConnection()
+		private $connection; # Главное подключение к бд. Получать через getConnection()
 		
-		public $connectionString = null; # Записывается только в случае успеха
-		public $username = ''; #
-		public $password = ''; #
+		private $connectionString = null; # Записывается только в случае успеха
+		private $username = ''; #
+		private $password = ''; #
 		
-		
-		public $last_statement = ""; # Результат последнего запроса. Висит в памяти, поэтому не держать крупные запросы.
+		/**
+		 * Результат последнего запроса. Висит в памяти, поэтому желательно очищать после больших запросов.
+		 * Очищать через ->clearLastStmt();
+		 */
+		private $lastStatement = ""; #
 		
 		
 		####################################
@@ -31,7 +34,7 @@
 		 * @param $Arr_config - массив с данными для подключения
 		 * @return string
 		 */
-		public static function Build_Conn_String( $Arr_config )
+		public static function buildConnString( $Arr_config )
 		{
 			$string  = $Arr_config['dbms']. ":" ;
 			$string .= "host=" . $Arr_config['host'] . ";" ;
@@ -68,7 +71,7 @@
 		 * @param $User
 		 * @param $Pass
 		 */
-		public function Connect( $Conn_str , $User , $Pass  )
+		public function connect( $Conn_str , $User , $Pass  )
 		{
 			
 			try
@@ -124,7 +127,7 @@
 		 * @return bool = true / false
 		 * echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
 		 */
-		function Check_connection(  )
+		function checkConnection(  )
 		{
 			
 			$con = $this->getConnection();
@@ -151,12 +154,6 @@
 		}
 		
 		
-		/**
-		 * Отключиться от сервера СУБД
-		 */
-		public function Disconnect___PUSTO( ){		}
-		
-		
 		####################################
 		### Мелкие запросы-обертки
 		
@@ -164,14 +161,14 @@
 		 * Выбрать рабочую БД
 		 * @param string $target_db
 		 */
-		public function Select_db( $target_db )
+		public function selectDataBase( $target_db )
 		{
 			$con = $this->getConnection();
 			
 			$con->exec("USE $target_db");
 			
-			if( $this->Have_error() )
-				$this->Echo_error( true ); # Вывести инфу и ВЫЙТИ
+			if( $this->haveError() )
+				$this->echoError( true ); # Вывести инфу и ВЫЙТИ
 			
 		}
 		
@@ -184,7 +181,7 @@
 		 * @param object PDO::Statement
 		 * @return bool = true / false
 		 */
-		public function Have_error( $statement = null )
+		public function haveError( $statement = null )
 		{
 			if ( $this->connection->errorCode() != "00000" )
 				return true;
@@ -201,7 +198,7 @@
 		 * @param bool $Exit_after_echo - Завершить скрипт после вывода
 		 * @param object PDO::Statement
 		 */
-		public function Echo_error( $Exit_after_echo = false , $stmt = null)
+		public function echoError( $Exit_after_echo = false , $stmt = null)
 		{
 			# https://www.php.net/manual/ru/pdo.errorinfo.php
 			# https://www.php.net/manual/ru/pdo.errorcode.php
@@ -246,10 +243,6 @@
 		}
 		
 
-		
-		
-		
-
 		####################################
 		###
 		
@@ -262,7 +255,7 @@
 		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
 		 * @return array|string
 		 */
-		public function Query( $query , $parameters = array( ) )
+		public function query( $query , $parameters = array( ) )
 		{
 			$con = $this->getConnection();
 			
@@ -271,10 +264,10 @@
 			$statement->execute($parameters);
 			
 			# Проверка на ошибку в запросе.
-			if( $this->Have_error( $statement ) )
-				$this->Echo_error(true , $statement ); # Вывести инфу и ВЫЙТИ
+			if( $this->haveError( $statement ) )
+				$this->echoError(true , $statement ); # Вывести инфу и ВЫЙТИ
 			
-			$this->last_statement = $statement;
+			$this->lastStatement = $statement;
 			
 		}
 		
@@ -287,7 +280,7 @@
 		 */
 		public function fetcher( $mode = "Assoc" )
 		{
-			$stmt = $this->last_statement;
+			$stmt = $this->lastStatement;
 			
 			if ( ! $stmt )
 				return "Last statement is empty (null).";
@@ -346,18 +339,10 @@
 		/**
 		 * Очищает результаты последнего запроса. (что бы не висел в памяти класса)
 		 */
-		public function Clear_Last_Stmt(  )
+		public function clearLastStmt(  )
 		{
 			$this->last_statement = null;
 		}
-		
-		
-		
-	
-		
-
-		
-
 		
 		
 		####################################
@@ -374,14 +359,8 @@
 		
 		####################################
 		###
-
-
-
 		
 		
-		
-		
-
 	} # End class
 	
 ?>
