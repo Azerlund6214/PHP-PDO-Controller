@@ -27,19 +27,30 @@
     
     //$PDO->Select_db("vk_monitor");
     
+    echo "<pre>";
     
- 
     
-    $sql = "SELECT * FROM mon_results WHERE id <= :id"; // AND post_url = ?";
+    //print_r ( $PDO->getDbScheme( "redirector" ) );
+    //print_r ( $PDO->getDbTables(  ) );
+    //print_r ( $PDO->getTableColumns("mon_results" ) );
+    
+    
+    echo "</pre>";
+    
+    exit("123");
+    
+    
+    
+    //$sql = "SELECT * FROM mon_results WHERE id <= :id"; // AND post_url = ?";
     //$sql = "UPDATE mon_results SET post_url='123' WHERE id >= 377 "; // AND post_url = ?";
     
     
     
     echo "<pre>";
-    print_r( $PDO->query($sql , [':id'=>88] ) );
+    //print_r( $PDO->query($sql , [':id'=>88] ) );
     #print_r( $PDO->fetcher( "c" ) );
     #print_r( $PDO->fetcher( "row" ) );
-    print_r( $PDO->fetcher( "all" ) );
+    //print_r( $PDO->fetcher( "all" ) );
     
     
     echo "</pre>";

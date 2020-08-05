@@ -154,25 +154,7 @@
         }
         
         
-        ####################################
-        ### Мелкие запросы-обертки
-        
-        /**
-         * Выбрать рабочую БД
-         * @param string $target_db
-         */
-        public function selectDataBase( $target_db )
-        {
-            $con = $this->getConnection();
-            
-            $con->exec("USE $target_db");
-            
-            if( $this->haveError() )
-                $this->echoError( true ); # Вывести инфу и ВЫЙТИ
-            
-        }
-        
-        
+
         ####################################
         ### Исключения и отладка.
         
@@ -343,8 +325,107 @@
         {
             $this->last_statement = null;
         }
+    
+    
+    
+        ####################################
+        ### Мелкие запросы-обертки
+    
+        /**
+         * Выбрать рабочую БД
+         * @param string $target_db
+         */
+        public function selectDataBase( $target_db )
+        {
+            $con = $this->getConnection();
         
+            $con->exec("USE $target_db");
         
+            if( $this->haveError() )
+                $this->echoError( true ); # Вывести инфу и ВЫЙТИ
+        
+        }
+    
+    
+        
+        public function getRowsCount( $target_table , $where = "" )
+        {
+            //$con = $this->getConnection();
+        
+            $this->query("SELECT count(*) FROM $target_table $where");
+        
+            if( $this->haveError() )
+                $this->echoError( true ); # Вывести инфу и ВЫЙТИ
+            
+            return $this->fetcher("one_row")['count(*)'];
+            
+        }
+    
+        public function getTableColumns( $target_table )
+        {
+            $this->query("SHOW COLUMNS FROM $target_table");
+    
+            if( $this->haveError() )
+                $this->echoError( true ); # Вывести инфу и ВЫЙТИ
+    
+            $result = $this->fetcher("assoc");
+            
+            $final_arr = array();
+            
+            foreach ($result as $one)
+            {
+                $final_arr  []= $one['Field'] . "   =   " . $one['Type'];
+            }
+            
+            return $final_arr;
+        
+        }
+    
+        public function getDbTables( $target_db = null )
+        {
+            
+            if ($target_db)
+                $this->query("SHOW TABLES FROM $target_db");
+            else
+                $this->query("SHOW TABLES");
+    
+            
+            if( $this->haveError() )
+                $this->echoError( true ); # Вывести инфу и ВЫЙТИ
+    
+            $result = $this->fetcher("assoc");
+            
+            
+            $final_arr = array();
+    
+            foreach ($result as $one)
+                foreach ($one as $key => $val)
+                    $final_arr  []= $val;
+    
+            return $final_arr;
+            
+        }
+    
+        public function getDbScheme( $target_db = null )
+        {
+            $this->selectDataBase($target_db);
+            
+            $arr_tables = $this->getDbTables(  );
+            
+            $final_arr = array();
+            
+            foreach ($arr_tables as $table_name)
+                foreach ( $this->getTableColumns($table_name) as $columns_arr )
+                    $final_arr[$table_name] []= $columns_arr;
+    
+                
+            echo "<pre>";
+            print_r ( $final_arr );
+            echo "</pre>";
+            
+            exit("<hr>Exit - getDbScheme()");
+        }
+    
         ####################################
         ###
         
