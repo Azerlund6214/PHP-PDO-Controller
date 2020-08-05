@@ -1,2 +1,4 @@
-# PHP-Class-DB-Controller
- Класс для работы с БД MySQL. (Пока наброски)
+# PHP-PDO-Controller
+
+ Класс для удобной работы с PDO.
+
