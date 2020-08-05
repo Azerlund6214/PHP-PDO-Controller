@@ -75,8 +75,7 @@
 			{
 				
 				$this -> connection = new PDO( $Conn_str, $User, $Pass );
-				
-				# Что бы выводились ошибки от PDO
+
 				//$this -> connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 				
 			} catch (PDOException $e) {
@@ -182,38 +181,63 @@
 		
 		/**
 		 * Произошла ли ошибка?
+		 * @param object PDO::Statement
 		 * @return bool = true / false
 		 */
-		public function Have_error(  )
+		public function Have_error( $statement = null )
 		{
 			if ( $this->connection->errorCode() != "00000" )
 				return true;
+			
+			if ( !is_null( $statement ))
+				if ( $statement->errorCode() != "00000" )
+					return true;
 			
 			return false;
 		}
 		
 		/**
-		 * Вывести текстом последнюю ошибку PDO
+		 * Вывести текстом последнюю ошибку PDO или Statement
 		 * @param bool $Exit_after_echo - Завершить скрипт после вывода
+		 * @param object PDO::Statement
 		 */
-		public function Echo_error( $Exit_after_echo = false )
+		public function Echo_error( $Exit_after_echo = false , $stmt = null)
 		{
 			# https://www.php.net/manual/ru/pdo.errorinfo.php
 			# https://www.php.net/manual/ru/pdo.errorcode.php
+			# https://www.php.net/manual/ru/pdo.error-handling.php
 			
 			$con = $this->getConnection();
 			
+			$have_error = false;
+			
+			
 			if ( $con->errorCode() != "00000" )
 			{
-				echo "<hr>Echo_error => Есть ошибки." ;
+				echo "<hr>Echo_error => Есть ошибки в PDO CONNECTION." ;
 				echo "<br><br>PDO::errorCode() => " . $con->errorCode() ;
 				echo "<br>PDO::errorInfo() [2] => " . $con->errorInfo()[2] ;
 				
 				echo "<br><br>PDO::errorInfo() => " ;
 				echo "<pre>"; print_r ( $con->errorInfo() ); echo "</pre>";
 				
+				$have_error = true;
 			}
-			else
+			
+			if ( !is_null($stmt) )
+				if ( $stmt->errorCode() != "00000" )
+				{
+					echo "<hr>Echo_error => Есть ошибки в PDO Statement" ;
+					echo "<br><br>PDO::errorCode() => " . $stmt->errorCode() ;
+					echo "<br>PDO::errorInfo() [2] => " . $stmt->errorInfo()[2] ;
+					
+					echo "<br><br>PDO::errorInfo() => " ;
+					echo "<pre>"; print_r ( $stmt->errorInfo() ); echo "</pre>";
+					
+					$have_error = true;
+				}
+			
+			if( ! $have_error )
 				echo "<br>Echo_error => Ошибок нет";
 			
 			
@@ -225,48 +249,7 @@
 		
 		
 		
-		
-		/**
-		 * Произошла ли ошибка?
-		 * @return bool = true / false
-		 */
-		public function Have_query_error( $stmt )
-		{
-			if ( $stmt->errorCode() != "00000" )
-				return true;
-			
-			return false;
-		}
-		
-		/**
-		 * Вывести текстом последнюю ошибку PDO
-		 * @param bool $Exit_after_echo - Завершить скрипт после вывода
-		 * TODO: Подумать как объединить методы для ошибок
-		 */
-		public function Echo_query_error( $stmt , $Exit_after_echo = false )
-		{
-			# https://www.php.net/manual/ru/pdo.errorinfo.php
-			# https://www.php.net/manual/ru/pdo.errorcode.php
-			
 
-			if ( $stmt->errorCode() != "00000" )
-			{
-				echo "<hr>Echo_error => Есть ошибки." ;
-				echo "<br><br>PDO::errorCode() => " . $stmt->errorCode() ;
-				echo "<br>PDO::errorInfo() [2] => " . $stmt->errorInfo()[2] ;
-				
-				echo "<br><br>PDO::errorInfo() => " ;
-				echo "<pre>"; print_r ( $stmt->errorInfo() ); echo "</pre>";
-				
-			}
-			else
-				echo "<br>Echo_error => Ошибок нет";
-			
-			
-			if ( $Exit_after_echo )
-				exit("<hr>PDO->Echo_error - Exit_after_echo=true");
-		}
-		
 		####################################
 		###
 		
@@ -278,20 +261,18 @@
 		 * @param $query
 		 * @param array $parameters = Значения для подстановки [':id'=>90 ... ]
 		 * @return array|string
-		 * # TODO: ПРОВЕРИТЬ отлов ошибок!!!
-		 * # TODO: ОТЛОВ НЕ РАБОТАЕТ - ДОДЕЛАТЬ.  См строку возле создания подключения!!!
 		 */
 		public function Query( $query , $parameters = array( ) )
 		{
 			$con = $this->getConnection();
 			
+			
 			$statement = $con->prepare($query);
 			$statement->execute($parameters);
 			
 			# Проверка на ошибку в запросе.
-			if( $this->Have_query_error( $statement ) )
-				$this->Echo_query_error( $statement, true ); # Вывести инфу и ВЫЙТИ
-
+			if( $this->Have_error( $statement ) )
+				$this->Echo_error(true , $statement ); # Вывести инфу и ВЫЙТИ
 			
 			$this->last_statement = $statement;
 			
