@@ -23,7 +23,7 @@
     
 	
 	
-    //echo ( $PDO->Check_connection() ) ? "Yes" :  "No";
+    //echo ( $PDO->checkConnection() ) ? "Yes" :  "No";
     
     //$PDO->Select_db("vk_monitor");
     
